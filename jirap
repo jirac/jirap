@@ -1,0 +1,54 @@
+#! /usr/bin/env node
+var http = require('http');
+var args = require('optimist').argv;
+
+var validateArgs = function(user, pass, issue) {
+        return user && pass && issue;
+}
+
+var username = args.user;
+var pass = args.pass;
+var issue = args.issue;
+
+if (args.h || !validateArgs(username,pass,issue)) {
+        console.log("Run: jirap --user USER --pass PASS --issue ISSUE-XYZ");
+        process.exit(0);
+}
+
+var comment = "";
+var stdin = process.openStdin();
+stdin.on('data', function(chunk) {
+  comment += chunk;
+});
+
+stdin.on('end', function() {
+  var options = {
+          auth: username + ":" + pass,
+          headers: {
+                  "Content-Type":"application/json"
+          },
+          hostname: 'bugs.vidal.net',
+          port: 80,
+          path: '/rest/api/2/issue/'+issue+'/comment',
+          method: 'POST'
+  };
+
+  var req = http.request(options, function(res) {
+          console.log('STATUS: ' + res.statusCode);
+          res.setEncoding('utf8');
+          res.on('data', function (chunk) {
+                  console.log('BODY: ' + chunk);
+          });
+  });
+
+  var payload = JSON.stringify({
+            "body": comment.replace('\\', "\n"),
+            "visibility": {
+                    "type": "role",
+                    "value": "Developers"
+            }
+  });
+
+  req.write(payload);
+  req.end();
+});
