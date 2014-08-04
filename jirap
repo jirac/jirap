@@ -6,12 +6,14 @@ var validateArgs = function(user, pass, issue) {
         return user && pass && issue;
 }
 
+var host = args.host
+var port = args.port
 var username = args.user;
 var pass = args.pass;
 var issue = args.issue;
 
-if (args.h || !validateArgs(username,pass,issue)) {
-        console.log("Run: jirap --user USER --pass PASS --issue ISSUE-XYZ");
+if (args.h || !validateArgs(host,port, username,pass,issue)) {
+        console.log("Run: jirap --host HOST --port PORT --user USER --pass PASS --issue ISSUE-XYZ");
         process.exit(0);
 }
 
@@ -27,8 +29,8 @@ stdin.on('end', function() {
           headers: {
                   "Content-Type":"application/json"
           },
-          hostname: 'bugs.vidal.net',
-          port: 80,
+          hostname: host,
+          port: port,
           path: '/rest/api/2/issue/'+issue+'/comment',
           method: 'POST'
   };
